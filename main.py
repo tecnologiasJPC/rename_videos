@@ -54,9 +54,10 @@ class VideoGame:
 
     def rename_file(self, old_name, new_name):
         title = new_name.split('.m')[0]
-        mp4_file = MP4(videos_folder + self.name)  # Cargar el archivo de video
+        mp4_file = MP4(videos_folder + old_name)  # Cargar el archivo de video
         mp4_file["\xa9nam"] = title  # Cambiar el título
         mp4_file.save()  # Guardar los cambios
+
         try:
             os.rename(videos_folder + old_name, videos_folder + new_name)
             shutil.move(videos_folder + new_name, videos_folder + self.name)
@@ -81,22 +82,19 @@ if __name__ == '__main__':
                 video.set(1, length - int(fps*22))  # set the last frame of video minus 22 seconds
                 ret_punt, frm_punt = video.read()   # last frame is saved
 
-                juego = VideoGame('Battlefield 1')
-                scenario = juego.get_scenario(frm_final, (47, 54, 675, 74))
-                #print('Escenario detectado:', scenario)
+                game = VideoGame('battlefield 1')
+                scenario = game.get_scenario(frm_final, (47, 54, 675, 74))
 
                 try:
-                    punctuation = juego.get_punctuation(frm_punt, (850, 485, 1060, 545))
+                    punctuation = game.get_punctuation(frm_punt, (850, 485, 1060, 545))
                     int(punctuation)
                 except ValueError:
-                    #print('No se detecto puntuacion, se vuelve a intentar')
                     video.set(1, length - int(fps * 27))  # set the last frame of video minus 22 seconds
                     ret_punt, frm_punt = video.read()  # last frame is saved
-                    punctuation = juego.get_punctuation(frm_punt, (850, 485, 1060, 545))
+                    punctuation = game.get_punctuation(frm_punt, (850, 485, 1060, 545))
 
-                #print('Puntuacion detectada:', punctuation)
                 name = 'Battlefield 1 ' + scenario + ' ' + punctuation + '.mp4'
                 print('New name: ' + name)
 
-            #juego.rename_file(file, name)  #this is used to rename the video file
             video.release()
+            game.rename_file(file, name)  #this is used to rename the video file
