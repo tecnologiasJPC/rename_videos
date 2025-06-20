@@ -1,6 +1,7 @@
 import os
 import cv2
 import shutil
+import sys
 import numpy as np
 from PIL import Image
 from PIL import ImageChops
@@ -41,8 +42,10 @@ class VideoGame:
         image_frame = Image.fromarray(converted_frame)
         return best_match(self.name, 'scenarios', image_frame, scenario_location)
 
-    def get_starring(self):
-        pass
+    def get_starring(self, character_frame, character_location):
+        converted_frame = cv2.cvtColor(character_frame, cv2.COLOR_BGR2RGB)
+        image_frame = Image.fromarray(converted_frame)
+        return best_match(self.name, 'characters', image_frame, character_location)
 
     def get_punctuation(self, punctuation_frame, punctuation_location):
         converted_frame = cv2.cvtColor(punctuation_frame, cv2.COLOR_BGR2RGB)
@@ -74,17 +77,17 @@ if __name__ == '__main__':
             video = cv2.VideoCapture(videos_folder + file)  # it reads video to analyze
             length = int(video.get(cv2.CAP_PROP_FRAME_COUNT))   # it gets the length of video in frames
             fps = video.get(cv2.CAP_PROP_FPS)   # it gets the frames per second
+            video.set(1, 0)  # set the first frame of video
+            ret_init, frm_init = video.read()  # first frame is saved
             video.set(1, length - 1)  # set the last frame of video
             ret_final, frm_final = video.read()  # last frame is saved
 
             if 'battlefield™ 1' in file.lower():
                 print('Video found for battlefield 1', file)
+                game = VideoGame('battlefield 1')
                 video.set(1, length - int(fps*22))  # set the last frame of video minus 22 seconds
                 ret_punt, frm_punt = video.read()   # last frame is saved
-
-                game = VideoGame('battlefield 1')
                 scenario = game.get_scenario(frm_final, (47, 54, 675, 74))
-
                 try:
                     punctuation = game.get_punctuation(frm_punt, (850, 485, 1060, 545))
                     int(punctuation)
@@ -96,5 +99,25 @@ if __name__ == '__main__':
                 name = 'Battlefield 1 ' + scenario + ' ' + punctuation + '.mp4'
                 print('New name: ' + name)
 
+            elif 'resident evil 4' in file.lower():
+                print('Video found for resident evil 4', file)
+                game = VideoGame('resident evil 4')
+                score_image = Image.open(videos_folder + 'Renombrar videos/resident evil 4/total score.png')
+                possible_score_locations = {0: 694, 1: 724, 2: 648, 3: 620}
+                opt = 0
+                for i in range(4):
+                    chop_score_label = frm_final[possible_score_locations[i]:possible_score_locations[i] + 36, 652:839]
+                    chop_score_label = cv2.cvtColor(chop_score_label, cv2.COLOR_BGR2RGB)
+                    chop_score_label = Image.fromarray(chop_score_label)
+                    if similarity(score_image, chop_score_label) > 90:
+                        opt = i
+
+                vert_pos = {0: 683, 1: 714, 2: 636, 3: 605}
+                punctuation = game.get_punctuation(frm_final, (1023, vert_pos[opt], 1270, vert_pos[opt] + 62))
+                scenario = game.get_scenario(frm_init, (1100, 0, 1920, 1080))
+                character = game.get_starring(frm_final, (0, 0, 600, 540))
+                name = 'Resident Evil 4 Remake Mercenaries ' + scenario + ' ' + character + ' ' + punctuation + '.mp4'
+                print('New name: ' + name)
+
             video.release()
-            game.rename_file(file, name)  #this is used to rename the video file
+            game.rename_file(file, name)  # this is used to rename the video file
