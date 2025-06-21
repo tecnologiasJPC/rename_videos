@@ -30,7 +30,7 @@ def best_match(game_name, category, image_frame, section):
         if percentage > match_percentage:
             match_percentage = percentage
             detected_match = options[image].replace('.png', '')
-    return detected_match
+    return detected_match, match_percentage
 
 
 class VideoGame:
@@ -48,6 +48,7 @@ class VideoGame:
         return best_match(self.name, 'characters', image_frame, character_location)
 
     def get_punctuation(self, punctuation_frame, punctuation_location):
+        (thresh, punctuation_frame) = cv2.threshold(punctuation_frame, 120, 255, cv2.THRESH_BINARY)
         converted_frame = cv2.cvtColor(punctuation_frame, cv2.COLOR_BGR2RGB)
         image_punctuation = Image.fromarray(converted_frame)
         punct_focused = image_punctuation.crop(punctuation_location)
@@ -91,7 +92,7 @@ if __name__ == '__main__':
                 game = VideoGame('battlefield 1')
                 video.set(1, length - int(fps*22))  # set the last frame of video minus 22 seconds
                 ret_punt, frm_punt = video.read()   # last frame is saved
-                scenario = game.get_scenario(frm_final, (47, 54, 675, 74))
+                scenario, _ = game.get_scenario(frm_final, (47, 54, 675, 74))
                 try:
                     punctuation = game.get_punctuation(frm_punt, (850, 485, 1060, 545))
                     int(punctuation)
@@ -117,17 +118,32 @@ if __name__ == '__main__':
                         opt = i
 
                 vert_pos = {0: 683, 1: 714, 2: 636, 3: 605}     # score can be in one of these locations
-                scenario = game.get_scenario(frm_init, (1100, 0, 1920, 1080))
-                character = game.get_starring(frm_final, (0, 0, 600, 540))
+                scenario, _ = game.get_scenario(frm_init, (1100, 0, 1920, 1080))
+                character, _ = game.get_starring(frm_final, (0, 0, 600, 540))
                 punctuation = game.get_punctuation(frm_final, (1023, vert_pos[opt], 1270, vert_pos[opt] + 62))
                 name = 'Resident Evil 4 Remake Mercenaries ' + scenario + ' ' + character + ' ' + punctuation + '.mp4'
+                print('New name: ' + name)
+
+            elif 'resident evil 5' in file.lower():
+                print('Video found for resident evil 5', file)
+                game = VideoGame('resident evil 5')
+                scenario, _ = game.get_scenario(frm_final, (580, 80, 1380, 180))
+                punctuation = game.get_punctuation(frm_final, (1275, 657, 1540, 706))
+                r_character, r_certainty = game.get_starring(frm_init, (1485, 812, 1630, 954))  # analyzing right side
+                l_character, l_certainty = game.get_starring(frm_init, (280, 818, 431, 956))  # analyzing left side
+                if r_certainty > l_certainty:
+                    character = r_character
+                else:
+                    character = l_character
+
+                name = 'Resident Evil 5 Mercenaries ' + scenario + ' ' + character + ' ' + punctuation + '.mp4'
                 print('New name: ' + name)
 
             elif 'resident evil 6' in file.lower():
                 print('Video found for resident evil 6', file)
                 game = VideoGame('resident evil 6')
-                scenario = game.get_scenario(frm_final, (457, 82, 761, 124))
-                character = game.get_starring(frm_final, (146, 156, 500, 206))
+                scenario, _ = game.get_scenario(frm_final, (457, 82, 761, 124))
+                character, _ = game.get_starring(frm_final, (146, 156, 500, 206))
                 punctuation = game.get_punctuation(frm_final, (551, 820, 776, 880))
                 name = 'Resident Evil 6 Remake Mercenaries ' + scenario + ' ' + character + ' ' + punctuation + '.mp4'
                 print('New name: ' + name)
