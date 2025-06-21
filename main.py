@@ -148,5 +148,14 @@ if __name__ == '__main__':
                 name = 'Resident Evil 6 Remake Mercenaries ' + scenario + ' ' + character + ' ' + punctuation + '.mp4'
                 print('New name: ' + name)
 
+            elif 'resident evil village' in file.lower():
+                print('Video found for resident evil village', file)
+                game = VideoGame('resident evil village')
+                scenario, _ = game.get_scenario(frm_init, (114, 71, 747, 183))
+                character, _ = game.get_starring(frm_init, (684, 846, 1266, 915))
+                punctuation = game.get_punctuation(frm_final, (762, 337, 1190, 411))
+                name = 'Resident Evil Village Mercenaries ' + scenario + ' ' + character + ' ' + punctuation + '.mp4'
+                print('New name: ' + name)
+
             video.release()
             game.rename_file(file, name)  # this is used to rename the video file
