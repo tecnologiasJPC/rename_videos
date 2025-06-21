@@ -57,9 +57,9 @@ class VideoGame:
 
     def rename_file(self, old_name, new_name):
         title = new_name.split('.m')[0]
-        mp4_file = MP4(videos_folder + old_name)  # Cargar el archivo de video
-        mp4_file["\xa9nam"] = title  # Cambiar el título
-        mp4_file.save()  # Guardar los cambios
+        mp4_file = MP4(videos_folder + old_name)  # load the video file
+        mp4_file["\xa9nam"] = title  # change video title
+        mp4_file.save()  # save changes
 
         try:
             os.rename(videos_folder + old_name, videos_folder + new_name)
@@ -82,6 +82,10 @@ if __name__ == '__main__':
             video.set(1, length - 1)  # set the last frame of video
             ret_final, frm_final = video.read()  # last frame is saved
 
+            if not ret_final:   # in case final frame is not correctly grabbed
+                video.set(1, length - 10)  # set another frame of video
+                ret_final, frm_final = video.read()  # last frame is saved
+
             if 'battlefield™ 1' in file.lower():
                 print('Video found for battlefield 1', file)
                 game = VideoGame('battlefield 1')
@@ -92,7 +96,7 @@ if __name__ == '__main__':
                     punctuation = game.get_punctuation(frm_punt, (850, 485, 1060, 545))
                     int(punctuation)
                 except ValueError:
-                    video.set(1, length - int(fps * 27))  # set the last frame of video minus 22 seconds
+                    video.set(1, length - int(fps * 27))  # set the last frame of video minus 27 seconds
                     ret_punt, frm_punt = video.read()  # last frame is saved
                     punctuation = game.get_punctuation(frm_punt, (850, 485, 1060, 545))
 
@@ -103,7 +107,7 @@ if __name__ == '__main__':
                 print('Video found for resident evil 4', file)
                 game = VideoGame('resident evil 4')
                 score_image = Image.open(videos_folder + 'Renombrar videos/resident evil 4/total score.png')
-                possible_score_locations = {0: 694, 1: 724, 2: 648, 3: 620}
+                possible_score_locations = {0: 694, 1: 724, 2: 648, 3: 620}  # label score can be in 4 locations
                 opt = 0
                 for i in range(4):
                     chop_score_label = frm_final[possible_score_locations[i]:possible_score_locations[i] + 36, 652:839]
@@ -112,11 +116,20 @@ if __name__ == '__main__':
                     if similarity(score_image, chop_score_label) > 90:
                         opt = i
 
-                vert_pos = {0: 683, 1: 714, 2: 636, 3: 605}
-                punctuation = game.get_punctuation(frm_final, (1023, vert_pos[opt], 1270, vert_pos[opt] + 62))
+                vert_pos = {0: 683, 1: 714, 2: 636, 3: 605}     # score can be in one of these locations
                 scenario = game.get_scenario(frm_init, (1100, 0, 1920, 1080))
                 character = game.get_starring(frm_final, (0, 0, 600, 540))
+                punctuation = game.get_punctuation(frm_final, (1023, vert_pos[opt], 1270, vert_pos[opt] + 62))
                 name = 'Resident Evil 4 Remake Mercenaries ' + scenario + ' ' + character + ' ' + punctuation + '.mp4'
+                print('New name: ' + name)
+
+            elif 'resident evil 6' in file.lower():
+                print('Video found for resident evil 6', file)
+                game = VideoGame('resident evil 6')
+                scenario = game.get_scenario(frm_final, (457, 82, 761, 124))
+                character = game.get_starring(frm_final, (146, 156, 500, 206))
+                punctuation = game.get_punctuation(frm_final, (551, 820, 776, 880))
+                name = 'Resident Evil 6 Remake Mercenaries ' + scenario + ' ' + character + ' ' + punctuation + '.mp4'
                 print('New name: ' + name)
 
             video.release()
