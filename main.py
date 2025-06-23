@@ -145,7 +145,7 @@ if __name__ == '__main__':
                 scenario, _ = game.get_scenario(frm_final, (457, 82, 761, 124))
                 character, _ = game.get_starring(frm_final, (146, 156, 500, 206))
                 punctuation = game.get_punctuation(frm_final, (551, 820, 776, 880))
-                name = 'Resident Evil 6 Remake Mercenaries ' + scenario + ' ' + character + ' ' + punctuation + '.mp4'
+                name = 'Resident Evil 6 Mercenaries ' + scenario + ' ' + character + ' ' + punctuation + '.mp4'
                 print('New name: ' + name)
 
             elif 'resident evil village' in file.lower():
