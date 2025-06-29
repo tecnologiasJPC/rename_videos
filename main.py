@@ -156,6 +156,8 @@ if __name__ == '__main__':
                 punctuation = game.get_punctuation(frm_final, (762, 337, 1190, 411))
                 name = 'Resident Evil Village Mercenaries ' + scenario + ' ' + character + ' ' + punctuation + '.mp4'
                 print('New name: ' + name)
+            else:
+                print('There is no video files to be processed')
 
             video.release()
             game.rename_file(file, name)  # this is used to rename the video file
