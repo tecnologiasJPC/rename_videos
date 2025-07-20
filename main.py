@@ -77,22 +77,26 @@ if __name__ == '__main__':
         if '.mp4' in file:  # it selects only video files
             video = cv2.VideoCapture(videos_folder + file)  # it reads video to analyze
             length = int(video.get(cv2.CAP_PROP_FRAME_COUNT))   # it gets the length of video in frames
+            vid_width, vid_height = int(video.get(cv2.CAP_PROP_FRAME_WIDTH)), int(video.get(cv2.CAP_PROP_FRAME_HEIGHT))
+            if vid_width != 1920 or vid_height != 1080:     # this script only works for 1920x1080 videos
+                print('Video', file, 'is not of 1920x1080')
+                continue
             fps = video.get(cv2.CAP_PROP_FPS)   # it gets the frames per second
             video.set(1, 0)  # set the first frame of video
             ret_init, frm_init = video.read()  # first frame is saved
-            video.set(1, length - 1)  # set the last frame of video
+            video.set(1, length - 30)  # set the last frame of video
             ret_final, frm_final = video.read()  # last frame is saved
 
             if not ret_final:   # in case final frame is not correctly grabbed
                 video.set(1, length - 10)  # set another frame of video
                 ret_final, frm_final = video.read()  # last frame is saved
 
-            if 'battlefield™ 1' in file.lower():
+            if 'battlefield™ 1' in file.lower() or 'battlefield 1' in file.lower():
                 print('Video found for battlefield 1', file)
                 game = VideoGame('battlefield 1')
                 video.set(1, length - int(fps*22))  # set the last frame of video minus 22 seconds
                 ret_punt, frm_punt = video.read()   # last frame is saved
-                scenario, _ = game.get_scenario(frm_final, (47, 54, 675, 74))
+                scenario, certainty = game.get_scenario(frm_final, (47, 54, 675, 74))
                 try:
                     punctuation = game.get_punctuation(frm_punt, (850, 485, 1060, 545))
                     int(punctuation)
@@ -102,7 +106,7 @@ if __name__ == '__main__':
                     punctuation = game.get_punctuation(frm_punt, (850, 485, 1060, 545))
 
                 name = 'Battlefield 1 ' + scenario + ' ' + punctuation + '.mp4'
-                print('New name: ' + name)
+                print('New name:', name, 'with certainty of:', round(certainty, 2))
 
             elif 'resident evil 4' in file.lower():
                 print('Video found for resident evil 4', file)
