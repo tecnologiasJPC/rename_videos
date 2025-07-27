@@ -34,8 +34,8 @@ def best_match(game_name, category, image_frame, section):
 
 
 class VideoGame:
-    def __init__(self, name):
-        self.name = name
+    def __init__(self, game_title):
+        self.name = game_title
 
     def get_scenario(self, scenario_frame, scenario_location):
         converted_frame = cv2.cvtColor(scenario_frame, cv2.COLOR_BGR2RGB)
@@ -79,7 +79,7 @@ if __name__ == '__main__':
             length = int(video.get(cv2.CAP_PROP_FRAME_COUNT))   # it gets the length of video in frames
             vid_width, vid_height = int(video.get(cv2.CAP_PROP_FRAME_WIDTH)), int(video.get(cv2.CAP_PROP_FRAME_HEIGHT))
             if vid_width != 1920 or vid_height != 1080:     # this script only works for 1920x1080 videos
-                print('Video', file, 'is not of 1920x1080')
+                video.release()
                 continue
             fps = video.get(cv2.CAP_PROP_FPS)   # it gets the frames per second
             video.set(1, 0)  # set the first frame of video
@@ -122,35 +122,37 @@ if __name__ == '__main__':
                         opt = i
 
                 vert_pos = {0: 683, 1: 714, 2: 636, 3: 605}     # score can be in one of these locations
-                scenario, _ = game.get_scenario(frm_init, (1100, 0, 1920, 1080))
-                character, _ = game.get_starring(frm_final, (0, 0, 600, 540))
+                scenario, s_certainty = game.get_scenario(frm_init, (1100, 0, 1920, 1080))
+                character, c_certainty = game.get_starring(frm_final, (0, 0, 600, 540))
                 punctuation = game.get_punctuation(frm_final, (1023, vert_pos[opt], 1270, vert_pos[opt] + 62))
                 name = 'Resident Evil 4 Remake Mercenaries ' + scenario + ' ' + character + ' ' + punctuation + '.mp4'
-                print('New name: ' + name)
+                print('New name: ' + name + ' at', str(int((s_certainty+c_certainty)/2)), '%')
 
             elif 'resident evil 5' in file.lower():
                 print('Video found for resident evil 5', file)
                 game = VideoGame('resident evil 5')
-                scenario, _ = game.get_scenario(frm_final, (580, 80, 1380, 180))
+                scenario, s_certainty = game.get_scenario(frm_final, (580, 80, 1380, 180))
                 punctuation = game.get_punctuation(frm_final, (1275, 657, 1540, 706))
                 r_character, r_certainty = game.get_starring(frm_init, (1485, 812, 1630, 954))  # analyzing right side
                 l_character, l_certainty = game.get_starring(frm_init, (280, 818, 431, 956))  # analyzing left side
                 if r_certainty > l_certainty:
                     character = r_character
+                    c_certainty = r_certainty
                 else:
                     character = l_character
+                    c_certainty = l_certainty
 
                 name = 'Resident Evil 5 Mercenaries ' + scenario + ' ' + character + ' ' + punctuation + '.mp4'
-                print('New name: ' + name)
+                print('New name: ' + name + ' at', str(int((s_certainty+c_certainty)/2)), '%')
 
             elif 'resident evil 6' in file.lower():
                 print('Video found for resident evil 6', file)
                 game = VideoGame('resident evil 6')
-                scenario, _ = game.get_scenario(frm_final, (457, 82, 761, 124))
-                character, _ = game.get_starring(frm_final, (146, 156, 500, 206))
+                scenario, s_certainty = game.get_scenario(frm_final, (457, 82, 761, 124))
+                character, c_certainty = game.get_starring(frm_final, (146, 156, 500, 206))
                 punctuation = game.get_punctuation(frm_final, (551, 820, 776, 880))
                 name = 'Resident Evil 6 Mercenaries ' + scenario + ' ' + character + ' ' + punctuation + '.mp4'
-                print('New name: ' + name)
+                print('New name: ' + name + ' at', str(int((s_certainty+c_certainty)/2)), '%')
 
             elif 'resident evil village' in file.lower():
                 print('Video found for resident evil village', file)
@@ -161,7 +163,9 @@ if __name__ == '__main__':
                 name = 'Resident Evil Village Mercenaries ' + scenario + ' ' + character + ' ' + punctuation + '.mp4'
                 print('New name: ' + name)
             else:
-                print('There is no video files to be processed')
+                video.release()
+                continue
 
             video.release()
             game.rename_file(file, name)  # this is used to rename the video file
+    input("Press Enter pto exit...")
