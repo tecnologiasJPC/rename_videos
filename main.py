@@ -108,6 +108,15 @@ if __name__ == '__main__':
                 name = 'Battlefield 1 ' + scenario + ' ' + punctuation + '.mp4'
                 print('New name:', name, 'with certainty of:', round(certainty, 2))
 
+            elif 'battlefield™ v' in file.lower() or 'battlefield v' in file.lower():
+                print('Video found for battlefield v', file)
+                game = VideoGame('battlefield v')
+                scenario, s_certainty = game.get_scenario(frm_init, (1371, 42, 1836, 137))
+                date, hour = file.lower().split(' ')[-2], file.lower().split(' ')[-1]
+                name = 'Battlefield V ' + scenario + ' ' + date + ' ' + hour
+                name = name.replace('-', ' ')
+                print('New name: ' + name + ' at', str(int(s_certainty)), '%')
+
             elif 'resident evil 4' in file.lower():
                 print('Video found for resident evil 4', file)
                 game = VideoGame('resident evil 4')
@@ -168,4 +177,4 @@ if __name__ == '__main__':
 
             video.release()
             game.rename_file(file, name)  # this is used to rename the video file
-    input("Press Enter pto exit...")
+    input("Press Enter to exit...")
